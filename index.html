@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Animate a point along a route</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.js"></script>
+    <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <div id="map"></div>
+
+    <script>
+
+        const origin = [-122.414, 37.776];
+        const destination = [-77.032, 38.913];
+        const color = '#007cbf';
+
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic3dlcnQiLCJhIjoiY2s3bHNtdjF2MDJ1eTNmcGowanU5MHR4ZiJ9.hzhWj9bhgD5itpWAPc3nNA';
+        const map = new mapboxgl.Map({
+            container: 'map',
+            // Choose from Mapbox's core styles, or make your own style with Mapbox Studio,
+            style: 'mapbox://styles/mapbox/dark-v11',
+            center: [-96, 37.8],
+            zoom: 3,
+            projection: 'mercator'
+        });
+
+        map.on('load', () => {
+            // Add a source and layer displaying a point which will be animated in a circle.
+            map.addSource('route', {
+                'type': 'geojson',
+                'data': turf.featureCollection([])
+            });
+
+            map.addLayer({
+                'id': 'route',
+                'source': 'route',
+                'type': 'line',
+                'paint': {
+                    'line-width': 2,
+                    'line-color': color
+                }
+            });
+            const start = turf.point(origin);
+            const end = turf.point(destination);
+            const greatCircle = turf.greatCircle(start, end, { npoints: 100, properties: { name: 'Seattle to DC' } });
+            map.getSource('route').setData(greatCircle);
+
+        });
+    </script>
+
+</body>
+
+</html>
